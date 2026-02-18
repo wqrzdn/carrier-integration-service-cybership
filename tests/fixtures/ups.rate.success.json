@@ -1,0 +1,54 @@
+{
+  "RateResponse": {
+    "Response": {
+      "ResponseStatus": {
+        "Code": "1",
+        "Description": "Success"
+      },
+      "TransactionReference": {
+        "CustomerContext": "rate-request"
+      }
+    },
+    "RatedShipment": [
+      {
+        "Service": {
+          "Code": "03",
+          "Description": "UPS Ground"
+        },
+        "TotalCharges": {
+          "CurrencyCode": "USD",
+          "MonetaryValue": "12.34"
+        },
+        "GuaranteedDelivery": {
+          "BusinessDaysInTransit": "3"
+        }
+      },
+      {
+        "Service": {
+          "Code": "02",
+          "Description": "UPS 2nd Day Air"
+        },
+        "TotalCharges": {
+          "CurrencyCode": "USD",
+          "MonetaryValue": "28.90"
+        },
+        "GuaranteedDelivery": {
+          "BusinessDaysInTransit": "2"
+        }
+      },
+      {
+        "Service": {
+          "Code": "01",
+          "Description": "UPS Next Day Air"
+        },
+        "TotalCharges": {
+          "CurrencyCode": "USD",
+          "MonetaryValue": "54.15"
+        },
+        "GuaranteedDelivery": {
+          "BusinessDaysInTransit": "1"
+        }
+      }
+    ]
+  }
+}

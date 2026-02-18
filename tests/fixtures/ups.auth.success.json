@@ -1,0 +1,8 @@
+{
+  "access_token": "test_access_token_abc123",
+  "token_type": "Bearer",
+  "issued_at": "1700000000000",
+  "expires_in": 3600,
+  "status": "approved",
+  "scope": "read"
+}
