@@ -3,11 +3,11 @@ import { Package } from './Package';
 import { ServiceLevel } from './ServiceLevel';
 
 /*
- * This is the main input for our service. It’s designed to be "carrier-blind," 
- * meaning it doesn't care if you're using UPS or FedEx. It just asks for the 
- * basics: from where, to where, what’s in the boxes, and how fast you want it. 
- * I’ve set it up to handle multiple packages at once, which is a big requirement 
- * for most shipping platforms.
+ * this is the main input for our service. it is designed to be carrier blind 
+ * meaning it does not care if you are using ups or fedex. it just asks for 
+ * the basics: from where, to where, what is in the boxes, and how fast you 
+ * want it. i set it up to handle multiple packages at once because most 
+ * shipping platforms need that.
  */
 export interface RateRequest {
   origin: Address;

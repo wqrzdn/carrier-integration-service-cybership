@@ -3,11 +3,11 @@ import { HttpClient } from './HttpClient';
 import { HttpError } from './HttpError';
 
 /*
- * This is a thin wrapper around Axios that implements our HttpClient interface. 
- * I’ve added a 'normalize' helper here to catch raw Axios errors and turn them into 
- * our own HttpError type. This is important because if we ever swap Axios for Fetch 
- * or another library, we won't have to change the error handling logic in our 
- * carrier classes-they only ever see our custom error format.
+ * this is a thin wrapper around axios. i added a normalize helper to catch 
+ * raw axios errors and turn them into our own httperror type. this is 
+ * important because if we ever swap axios for fetch or anything else 
+ * we will not have to change the logic in our carrier classes. they 
+ * only see our custom error format.
  */ 
 export class AxiosHttpClient implements HttpClient {
   constructor(
@@ -51,7 +51,7 @@ export class AxiosHttpClient implements HttpClient {
       const axiosErr = err as AxiosError;
       
       if (!axiosErr.response) {
-        const networkError = new Error(`Network error: ${axiosErr.message}`);
+        const networkError = new Error(`network error: ${axiosErr.message}`);
         (networkError as any).cause = err;
         return networkError;
       }

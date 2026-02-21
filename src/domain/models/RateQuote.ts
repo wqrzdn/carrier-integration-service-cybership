@@ -1,9 +1,8 @@
 export interface RateQuote {
-  /* *
-   * This is the final result we show the user. I’ve normalized everything so that 
-   * whether the price comes from UPS or FedEx, the format is identical. 
-   * I also made 'deliveryDays' optional because some budget services 
-   * don't give a guaranteed date.
+  /* * * this is the final result we show the user. i normalized everything so that 
+   * whether the price comes from ups or fedex the format is identical. 
+   * i also made deliverydays optional because some budget services 
+   * do not give a guaranteed date.
    */
   carrier: string;
   serviceCode: string;

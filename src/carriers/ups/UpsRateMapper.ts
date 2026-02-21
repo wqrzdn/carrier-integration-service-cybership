@@ -2,14 +2,19 @@ import { UpsRateResponse } from './ups.schemas';
 import { RateQuote } from '../../domain/models/RateQuote';
 
 /*
- * This is the final "Cleanup Crew." It takes that massive, deeply nested UPS 
- * response and filters out only the parts we care about. I’ve made sure to 
- * convert strings like "12.45" back into real numbers and handled the 
- * delivery days as an optional field so our frontend doesn't get cluttered 
- * with 'undefined' values.
+ *  I noticed a specific UPS API quirk: 
+ * if there's only one rate, they sometimes return an object instead of 
+ * an array. I've added a normalization step here so the rest of  app 
+ * always receives a consistent list, regardless of how many rates come 
+ * back.
  */
 export function mapUpsRateResponse(response: UpsRateResponse): RateQuote[] {
-  return response.RateResponse.RatedShipment.map((shipment) => {
+  // Normalize single object to array to ensure .map() never fails
+  const shipments = Array.isArray(response.RateResponse.RatedShipment)
+    ? response.RateResponse.RatedShipment
+    : [response.RateResponse.RatedShipment];
+
+  return shipments.map((shipment) => {
     const deliveryDaysRaw = shipment.GuaranteedDelivery?.BusinessDaysInTransit;
 
     return {

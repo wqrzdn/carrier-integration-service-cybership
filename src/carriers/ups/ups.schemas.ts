@@ -1,12 +1,12 @@
 import { z } from 'zod';
 
 /*
- * These are our "Safety Nets" for the UPS API responses. I’m using Zod to strictly 
+ *  I’m using Zod to strictly 
  * define what the UPS JSON should look like. If UPS ever changes a field name 
  * or starts sending strings where we expect numbers, these schemas will catch 
  * it immediately. This prevents our app from crashing with "Cannot read property 
  * of undefined" errors deep in the logic.
- */
+ */ 
 
 export const UpsAuthResponseSchema = z.object({
   access_token: z.string(),
@@ -29,7 +29,11 @@ const UpsRatedShipmentSchema = z.object({
 
 export const UpsRateResponseSchema = z.object({
   RateResponse: z.object({
-    RatedShipment: z.array(UpsRatedShipmentSchema),
+    // UPS API quirk: RatedShipment can be a single object or an array
+    RatedShipment: z.union([
+      z.array(UpsRatedShipmentSchema),
+      UpsRatedShipmentSchema,
+    ]),
   }),
 });
 

@@ -3,6 +3,14 @@ import { HttpClient } from '../../src/http/HttpClient';
 import { HttpError } from '../../src/http/HttpError';
 import authFixture from '../fixtures/ups.auth.success.json';
 
+/*
+ * these tests are validating the full token lifecycle for ups auth client.
+ * we are checking first time acquisition, caching behaviour, cache clearing,
+ * concurrency control, auth failure handling and expiry refresh logic.
+ * this ensures our oauth handling is efficient, safe from race conditions
+ * and resilient against authentication failures in production.
+ */
+
 function makeHttpStub(): jest.Mocked<HttpClient> {
   return {
     post: jest.fn(),
@@ -102,5 +110,43 @@ describe('UpsAuthClient - token lifecycle', () => {
       { grant_type: 'client_credentials' },
       { Authorization: `Basic ${expectedB64}` }
     );
+  });
+
+  it('single-flights concurrent token requests (thundering herd protection)', async () => {
+    const http = makeHttpStub();
+
+    http.postForm.mockResolvedValueOnce({
+      access_token: 'test-token-concurrent',
+      expires_in: 3600,
+    });
+
+    const authClient = new UpsAuthClient(http, 'id', 'secret', 60);
+
+    const promises = Array.from({ length: 10 }, () => authClient.getToken());
+    const tokens = await Promise.all(promises);
+
+    expect(tokens).toHaveLength(10);
+    tokens.forEach(token => expect(token).toBe('test-token-concurrent'));
+
+    expect(http.postForm).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows new token fetch after previous completes', async () => {
+    const http = makeHttpStub();
+    http.postForm
+      .mockResolvedValueOnce({ access_token: 'token-1', expires_in: 1 })
+      .mockResolvedValueOnce({ access_token: 'token-2', expires_in: 3600 });
+
+    const authClient = new UpsAuthClient(http, 'id', 'secret', 0);
+
+    const token1 = await authClient.getToken();
+    expect(token1).toBe('token-1');
+
+    await new Promise(resolve => setTimeout(resolve, 1100));
+
+    const token2 = await authClient.getToken();
+    expect(token2).toBe('token-2');
+
+    expect(http.postForm).toHaveBeenCalledTimes(2);
   });
 });

@@ -7,6 +7,14 @@ import { RateRequest } from '../../src/domain/models/RateRequest';
 import authFixture from '../fixtures/ups.auth.success.json';
 import malformedFixture from '../fixtures/ups.rate.malformed.json';
 
+/*
+ * these tests are validating error handling and classification logic for ups carrier.
+ * we are ensuring proper mapping of http status codes, network failures,
+ * malformed responses and authentication breakdowns into domain level errors.
+ * this guarantees that retry logic behaves correctly and non retryable
+ * failures are clearly identified without causing unstable behaviour.
+ */
+
 const validRequest: RateRequest = {
   origin: {
     street1: '400 Perimeter Center',
@@ -32,25 +40,26 @@ function makeHttpStub(): jest.Mocked<HttpClient> {
   } as jest.Mocked<HttpClient>;
 }
 
-// test carriers directly to verify error mapping behavior
-// RateService now uses Promise.allSettled to handle partial failures 
+// disable retries in tests for instant execution
+const TEST_RETRY_OPTIONS = { maxAttempts: 1, initialDelayMs: 0 };
+
+// test carriers directly to verify error mapping behaviour
+// RateService now uses promise.allsettled to handle partial failures
 describe('UPS Integration - Error Handling', () => {
   it('maps 401 and 429 to retryable carrier errors', async () => {
     const http = makeHttpStub();
     http.postForm.mockResolvedValue(authFixture);
-    
+
     const authClient = new UpsAuthClient(http, 'id', 'secret');
     const carrier = new UpsCarrier(authClient, http);
 
-    // Test 401 - should auto-retry but eventually fail if it persists
     http.post.mockRejectedValue(new HttpError(401, null));
     await expect(carrier.getRates(validRequest)).rejects.toMatchObject({
       code: 'AUTH_FAILED',
       retryable: true,
     });
 
-    // Test 429
-    http.post.mockRejectedValueOnce(new HttpError(429, null));
+    http.post.mockRejectedValue(new HttpError(429, null));
     await expect(carrier.getRates(validRequest)).rejects.toMatchObject({
       code: 'RATE_LIMITED',
       retryable: true,
@@ -60,19 +69,17 @@ describe('UPS Integration - Error Handling', () => {
   it('maps 5xx status codes to UPSTREAM_UNAVAILABLE or UPSTREAM_ERROR', async () => {
     const http = makeHttpStub();
     http.postForm.mockResolvedValue(authFixture);
-    
+
     const authClient = new UpsAuthClient(http, 'id', 'secret');
     const carrier = new UpsCarrier(authClient, http);
 
-    // Test 503 - specific unavailable error
-    http.post.mockRejectedValueOnce(new HttpError(503, null));
+    http.post.mockRejectedValue(new HttpError(503, null));
     await expect(carrier.getRates(validRequest)).rejects.toMatchObject({
       code: 'UPSTREAM_UNAVAILABLE',
       retryable: true,
     });
 
-    // Test 500 - general upstream error
-    http.post.mockRejectedValueOnce(new HttpError(500, null));
+    http.post.mockRejectedValue(new HttpError(500, null));
     await expect(carrier.getRates(validRequest)).rejects.toMatchObject({
       code: 'UPSTREAM_ERROR',
       retryable: true,
@@ -110,10 +117,10 @@ describe('UPS Integration - Error Handling', () => {
   it('catches network-level failures like connection resets', async () => {
     const http = makeHttpStub();
     http.postForm.mockResolvedValue(authFixture);
-    
+
     const networkError = new Error('socket hang up');
     networkError.message = 'ECONNRESET';
-    http.post.mockRejectedValueOnce(networkError);
+    http.post.mockRejectedValue(networkError);
 
     const authClient = new UpsAuthClient(http, 'id', 'secret');
     const carrier = new UpsCarrier(authClient, http);

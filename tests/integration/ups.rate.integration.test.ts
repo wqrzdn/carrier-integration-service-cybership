@@ -8,6 +8,14 @@ import { ServiceLevel } from '../../src/domain/models/ServiceLevel';
 import successFixture from '../fixtures/ups.rate.success.json';
 import authFixture from '../fixtures/ups.auth.success.json';
 
+/*
+ * these tests are validating end to end ups rate shopping behaviour.
+ * we are checking quote normalization, payload construction, service level
+ * mapping, package transformation and input validation short circuiting.
+ * this ensures our rate service correctly builds requests, interprets
+ * responses and prevents invalid calls from reaching external systems.
+ */
+
 function makeHttpStub(overrides?: Partial<HttpClient>): jest.Mocked<HttpClient> {
   return {
     post: jest.fn(),
@@ -15,6 +23,9 @@ function makeHttpStub(overrides?: Partial<HttpClient>): jest.Mocked<HttpClient> 
     ...overrides,
   } as jest.Mocked<HttpClient>;
 }
+
+// disable retries in tests for instant execution
+const TEST_RETRY_OPTIONS = { maxAttempts: 1, initialDelayMs: 0 };
 
 const validRequest: RateRequest = {
   origin: {

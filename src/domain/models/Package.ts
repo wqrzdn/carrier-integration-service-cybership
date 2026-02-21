@@ -1,7 +1,7 @@
 export interface Package {
   /* *
-   * Simple package model for weights and sizes. For now, we're sticking to 
-   * inches and pounds since that's what UPS prefers. I've nested the 
+   * simple package model for weights and sizes. for now we are sticking to 
+   * inches and pounds since that is what ups prefers. i nested the 
    * dimensions to keep the object structure organized.
    */
   weight: number; 
