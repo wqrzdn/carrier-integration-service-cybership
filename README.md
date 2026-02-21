@@ -17,7 +17,7 @@
   - 53 integration tests (not just happy paths, but failure scenarios too)
   - Operational documentation (configuration tradeoffs explained)
 
-  Video walkthrough explaining the architecture and resilience patterns → [YouTube link will be added here]
+  **📹 Video Walkthrough:** [Watch the architecture & resilience patterns explanation on YouTube](https://youtu.be/zVSOHYQ_6oo)
 
   ![Tests](https://img.shields.io/badge/tests-53%20passing-success) ![Coverage](https://img.shields.io/badge/coverage-comprehensive-brightgreen) ![TypeScript](https://img.shields.io/badge/typescript-strict%20mode-blue) ![Resilience](https://img.shields.io/badge/resilience-circuit%20breaker%20%2B%20retry-orange)
 
